@@ -1,0 +1,14 @@
+﻿  main.cpp
+c:\dev\c++\matrices\matrices\matrix.h(187): warning C4018: '>=': signed/unsigned mismatch
+  c:\dev\c++\matrices\matrices\matrix.h(186): note: while compiling class template member function 'void Matrix<double>::addRowToRow(size_t,size_t,T)'
+          with
+          [
+              T=double
+          ]
+  c:\dev\c++\matrices\matrices\matrix.h(281): note: see reference to function template instantiation 'void Matrix<double>::addRowToRow(size_t,size_t,T)' being compiled
+          with
+          [
+              T=double
+          ]
+  c:\dev\c++\matrices\matrices\main.cpp(34): note: see reference to class template instantiation 'Matrix<double>' being compiled
+  Matrices.vcxproj -> C:\Dev\C++\Matrices\Debug\Matrices.exe
