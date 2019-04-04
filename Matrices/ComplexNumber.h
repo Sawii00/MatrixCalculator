@@ -1,4 +1,13 @@
 #pragma once
+/*
+-multiplication
+-division
+-power of two
+-conjugated
+-
+
+*/
+
 class ComplexNumber
 {
 private:

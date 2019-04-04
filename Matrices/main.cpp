@@ -35,8 +35,7 @@ int main() {
 	Matrix<double> a(array, m, n);
 	printMatrix(a);
 
-	a.reduceToEchelonForm();
-	printMatrix(a);
+	std::cout << a.isAntisymmetrical();
 
 	system("pause");
 

@@ -1,5 +1,11 @@
 #pragma once
 #include <cmath>
+
+enum MatrixType
+{
+	Nothing, Symmetrical, AntiSymmetrical, Diagonal, UpperTriangular, LowerTriangular
+};
+
 template <class T>
 class Matrix
 {
@@ -126,10 +132,10 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////UTILITY METHODS//////////////////////////////////////////////////////////////////////////
 
-	int getRows() { return m_rows; }
-	int getCols() { return m_cols; }
-	T** getMatrixPointer() { return m_arr; }
-	void nullify() { m_arr = nullptr; }
+	inline int getRows() { return m_rows; }
+	inline int getCols() { return m_cols; }
+	inline T** getMatrixPointer() { return m_arr; }
+	inline void nullify() { m_arr = nullptr; }
 	void setElement(size_t i, size_t j, T el) {
 		if (i < 0 || i > m_rows - 1 || j < 0 || j > m_cols - 1) throw "OutOfBoundAccess";
 		m_arr[i][j] = el;
@@ -283,15 +289,61 @@ public:
 		}
 	}
 
-	bool isSymmetrical() {}
-	bool isAntisymmetrical() {}
-	bool isUpperTriangular() {}
-	bool isLowerTriangular() {}
-	bool isDiagonal() {}
+	bool isSymmetrical() {
+		Matrix<T> temp = transposedMatrix();
+		return temp == *this;
+	}
+	bool isAntisymmetrical() {
+		Matrix<T> temp = transposedMatrix();
+		temp *= (-1.0);
+		return temp == *this;
+	}
+	bool isUpperTriangular() {
+		for (int i = 0; i < m_rows; i++) {
+			for (int j = 0; j < m_rows; j++) {
+				if (i <= j)continue;
+				else {
+					if (m_arr[i][j] != 0)return false;
+				}
+			}
+		}
+		return true;
+	}
+	bool isLowerTriangular() {
+		for (int i = 0; i < m_rows; i++) {
+			for (int j = 0; j < m_rows; j++) {
+				if (i >= j)continue;
+				else {
+					if (m_arr[i][j] != 0)return false;
+				}
+			}
+		}
+		return true;
+	}
+	bool isDiagonal() {
+		for (int i = 0; i < m_rows; i++) {
+			for (int j = 0; j < m_rows; j++) {
+				if (i == j)continue;
+				else {
+					if (m_arr[i][j] != 0)return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	MatrixType categorizeMatrix() {
+		if (isDiagonal())return MatrixType::Diagonal;
+		else if (isLowerTriangular())return MatrixType::LowerTriangular;
+		else if (isUpperTriangular())return MatrixType::UpperTriangular;
+		else if (isSymmetrical())return MatrixType::Symmetrical;
+		else if (isAntisymmetrical())return MatrixType::AntiSymmetrical;
+		else return MatrixType::Nothing;
+	}
 
 	//////////////////////////////////////////////////////////////////////////OPERATORSSSSSSS///////////////////////////////////////////////////////////////////
 
-	MITM operator[](int index) {
+	inline MITM operator[](int index) {
 		if (index >= 0 && index < m_rows) {
 			return MITM(m_arr[index], m_cols);
 		}
@@ -300,7 +352,7 @@ public:
 		}
 	}
 
-	void operator=(const Matrix& mat) {
+	inline void operator=(const Matrix& mat) {
 		m_rows = mat.getRows();
 		m_cols = mat.getCols();
 		if (m_arr) {
@@ -320,7 +372,7 @@ public:
 			}
 		}
 	}
-	void operator=(Matrix&& mat) {
+	inline void operator=(Matrix&& mat) {
 		m_rows = mat.getRows();
 		m_cols = mat.getCols();
 		if (m_arr) {
@@ -354,6 +406,24 @@ public:
 	}
 	inline Matrix<T>& operator-=(const Matrix& rhs) {
 		subtract(rhs);
+		return *this;
+	}
+	inline Matrix<T> operator*(const T& scalar) {
+		Matrix<T> res(*this);
+		res.multiplyByScalar(scalar);
+		return res;
+	}
+	inline Matrix<T> operator/(const T& scalar) {
+		Matrix<T> res(*this);
+		res.multiplyByScalar(1.0 / scalar);
+		return res;
+	}
+	inline Matrix<T>& operator*=(const T& scalar) {
+		multiplyByScalar(scalar);
+		return *this;
+	}
+	inline Matrix<T>& operator/=(const T& scalar) {
+		multiplyByScalar(1 / scalar);
 		return *this;
 	}
 };
