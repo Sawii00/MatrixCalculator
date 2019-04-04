@@ -115,6 +115,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ComplexNumber.h" />
     <ClInclude Include="Matrix.h" />
   </ItemGroup>
   <ItemGroup>

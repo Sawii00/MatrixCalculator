@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Matrix.h"
+#include "ComplexNumber.h"
 
 template <class T>
 void printMatrix(Matrix<T>& mat) {

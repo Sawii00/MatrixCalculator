@@ -283,6 +283,12 @@ public:
 		}
 	}
 
+	bool isSymmetrical() {}
+	bool isAntisymmetrical() {}
+	bool isUpperTriangular() {}
+	bool isLowerTriangular() {}
+	bool isDiagonal() {}
+
 	//////////////////////////////////////////////////////////////////////////OPERATORSSSSSSS///////////////////////////////////////////////////////////////////
 
 	MITM operator[](int index) {
@@ -331,5 +337,23 @@ public:
 	}
 	inline bool operator!=(Matrix& rhs) {
 		return !equal(rhs);
+	}
+	inline Matrix<T> operator+(const Matrix& rhs) {
+		Matrix<T> res(*this);
+		res.add(rhs);
+		return res;
+	}
+	inline Matrix<T> operator-(const Matrix& rhs) {
+		Matrix<T> res(*this);
+		res.subtract(rhs);
+		return res;
+	}
+	inline Matrix<T>& operator+=(const Matrix& rhs) {
+		add(rhs);
+		return *this;
+	}
+	inline Matrix<T>& operator-=(const Matrix& rhs) {
+		subtract(rhs);
+		return *this;
 	}
 };
