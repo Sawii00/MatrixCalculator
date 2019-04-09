@@ -34,12 +34,12 @@ int main() {
 
 	Matrix<double> a(array, m, n);
 	printMatrix(a);
-
-	Matrix<double> inv = a.inverseMatrix();
-	printMatrix(inv);
-
-	a *= inv;
+	a.orderByLeadingZeros();
 	printMatrix(a);
+	a.reduceToEchelonForm();
+	printMatrix(a);
+
+	std::cout << a.rank();
 
 	system("pause");
 

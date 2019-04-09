@@ -44,6 +44,8 @@ public:
 	void subtract(const double& n) {
 		m_real -= n;
 	}
+	ComplexNumber multiply(const ComplexNumber& rhs) {
+	}
 
 	//////////////////////////////////////////////////////////////////////////OPERATORS
 	void operator=(const ComplexNumber& n) {

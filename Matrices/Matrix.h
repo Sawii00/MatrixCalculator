@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <cmath>
 
 enum MatrixType
@@ -47,10 +48,77 @@ private:
 		return 0;
 	}
 
+	Matrix<T> returnEchelonForm() {
+		Matrix<T> res(*this);
+		res.reduceToEchelonForm();
+		return res;
+	}
+
+	void swapRows(size_t row1, size_t row2) {
+		if (row1 < 0 || row1 >= m_rows || row2 < 0 || row2 >= m_rows)throw "Out of Bounds";
+		T* temp = m_arr[row1];
+		m_arr[row1] = m_arr[row2];
+		m_arr[row2] = temp;
+	}
+	//working
+
+	size_t n_of_leading_zeros(size_t row) {
+		size_t counter = 0;
+		for (register int j = 0; j < m_cols; ++j) {
+			if (m_arr[row][j] == 0)counter++;
+			else return counter;
+		}
+		return counter;
+	}
+
+	void print_array() {
+		for (int i = 0; i < m_rows; i++)
+		{
+			for (int j = 0; j < m_cols; j++) {
+				std::cout << m_arr[i][j] << ',';
+			}
+			std::cout << '\n';
+		}
+		std::cout << std::endl;
+	}
+
+	bool false_zero(T n) {
+		//only works with standard types
+		if (std::abs(n) < 0.0000001) return true;
+		return false;
+	}
+
 public:
+	void orderByLeadingZeros() {
+		int most_zeros = -1;
+		size_t n_of_zeros = 0;
+		size_t counter = 0;
+		for (register int k = m_rows; k > 0; --k) {
+			for (register int i = 0; i < k; ++i) {
+				counter = n_of_leading_zeros(i);
+				if (counter > n_of_zeros) {
+					most_zeros = i;
+					n_of_zeros = counter;
+				}
+
+				counter = 0;
+			}
+			if (most_zeros != m_rows - 1 && most_zeros >= 0)swapRows(most_zeros, k - 1);
+			n_of_zeros = 0;
+			most_zeros = -1;
+		}
+	}
+
+	void check_and_clear_almost_zeros() {
+		for (int i = 0; i < m_rows; i++)
+		{
+			for (int j = 0; j < m_cols; j++) {
+				if (false_zero(m_arr[i][j]))m_arr[i][j] = 0;
+			}
+		}
+	}
 
 	//////////////////////////////////////////////////////////////////////////CONSTRUCTORS AND DESTRUCTORS////////////////////////////////////////7///////////////////
-
 	Matrix() = delete;
 	Matrix(int m, int n)
 		:m_rows(m), m_cols(n)
@@ -125,6 +193,7 @@ public:
 				throw "Out of Bounds";
 			}
 		}
+
 	private:
 		T* arr = nullptr;
 		int n = 0;
@@ -132,8 +201,8 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////UTILITY METHODS//////////////////////////////////////////////////////////////////////////
 
-	inline int getRows() { return m_rows; }
-	inline int getCols() { return m_cols; }
+	inline int getRows() const { return m_rows; }
+	inline int getCols() const { return m_cols; }
 	inline T** getMatrixPointer() { return m_arr; }
 	inline void nullify() { m_arr = nullptr; }
 	void setElement(size_t i, size_t j, T el) {
@@ -192,7 +261,7 @@ public:
 	void addRowToRow(size_t destination, size_t source, T multiplication_factor = 1) {
 		if (destination < 0 || destination >= m_rows || source < 0 || source >= m_rows)return;
 		for (int j = 0; j < m_cols; j++) {
-			m_arr[destination][j] += m_arr[source][j] * multiplication_factor;
+			m_arr[destination][j] = (m_arr[destination][j] + m_arr[source][j] * multiplication_factor);
 		}
 	}
 
@@ -261,6 +330,17 @@ public:
 		}
 		return res;
 	}
+
+	int rank() {
+		Matrix<T> tmp = returnEchelonForm();
+		int counter = 0;
+		for (register int i = 0; i < m_rows; ++i) {
+			if (findPivot(i) != 0)counter++;
+			else return counter;
+		}
+		return counter;
+	}
+
 	Matrix<T> inverseMatrix() {
 		Matrix<T> res(m_rows, m_cols);
 		Matrix<T> temp(m_rows - 1, m_cols - 1);
@@ -280,15 +360,35 @@ public:
 		Matrix<T> transpose = transposedMatrix();
 		return inverse == transpose;
 	}
+	//not the most efficient....
+
+	/*@TODO problem with this matrix (
+		3,-1,-2,3,-1,
+		4, 1, 2, 5, 4,
+		7, 10, 10, 2, -3,
+		2, -3, -6, 1, -6,
+		3, 9, 8, -6, -7,
+		)
+		*/
+	
+	//http://www.math-exercises.com/matrices/rank-of-a-matrix
+
 
 	void reduceToEchelonForm() {
 		T pivot;
+		orderByLeadingZeros();
 		for (int i = 1; i < m_rows; i++) {
+			if (n_of_leading_zeros(i - 1) < n_of_leading_zeros(i))continue;
 			pivot = findPivot(i - 1);
+			if (pivot == 0)continue; //OR BREAK, I DON'T KNOW WHAT IS ADVISABLE
 			for (int j = i; j < m_rows; j++) {
+				if (n_of_leading_zeros(i - 1) < n_of_leading_zeros(j))continue;
 				addRowToRow(j, i - 1, -(findPivot(j) / pivot));
+				//print_array();
 			}
+			orderByLeadingZeros();
 		}
+		check_and_clear_almost_zeros();
 	}
 
 	bool isSymmetrical() {
@@ -345,7 +445,7 @@ public:
 
 	//////////////////////////////////////////////////////////////////////////OPERATORSSSSSSS///////////////////////////////////////////////////////////////////
 
-	inline MITM operator[](int index) {
+	inline MITM operator[](int index) const {
 		if (index >= 0 && index < m_rows) {
 			return MITM(m_arr[index], m_cols);
 		}
