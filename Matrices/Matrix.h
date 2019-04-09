@@ -247,6 +247,8 @@ public:
 		return res.trace();
 	}
 	T determinant() {
+		if (m_rows != m_cols)throw "Cannot calculate determinant of non-square matrix";
+		if (m_rows == 1 && m_cols == 1) return m_arr[0][0];
 		if (m_rows == 2 && m_cols == 2) {
 			return m_arr[0][0] * m_arr[1][1] - m_arr[0][1] * m_arr[1][0];
 		}
@@ -420,6 +422,10 @@ public:
 	}
 	inline Matrix<T>& operator*=(const T& scalar) {
 		multiplyByScalar(scalar);
+		return *this;
+	}
+	inline Matrix<T>& operator*=(Matrix& rhs) {
+		*this = rowByColProduct(rhs);
 		return *this;
 	}
 	inline Matrix<T>& operator/=(const T& scalar) {

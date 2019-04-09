@@ -35,7 +35,11 @@ int main() {
 	Matrix<double> a(array, m, n);
 	printMatrix(a);
 
-	std::cout << a.isAntisymmetrical();
+	Matrix<double> inv = a.inverseMatrix();
+	printMatrix(inv);
+
+	a *= inv;
+	printMatrix(a);
 
 	system("pause");
 
