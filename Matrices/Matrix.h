@@ -39,15 +39,6 @@ private:
 		return res;
 	}
 
-	T findPivot(size_t row) {
-		T val;
-		for (register int j = 0; j < m_cols; j++) {
-			val = m_arr[row][j];
-			if (val != 0)return val;
-		}
-		return 0;
-	}
-
 	Matrix<T> returnEchelonForm() {
 		Matrix<T> res(*this);
 		res.reduceToEchelonForm();
@@ -87,8 +78,6 @@ private:
 		if (std::abs(n) < 0.0000001) return true;
 		return false;
 	}
-
-public:
 	void orderByLeadingZeros() {
 		int most_zeros = -1;
 		size_t n_of_zeros = 0;
@@ -96,7 +85,7 @@ public:
 		for (register int k = m_rows; k > 0; --k) {
 			for (register int i = 0; i < k; ++i) {
 				counter = n_of_leading_zeros(i);
-				if (counter > n_of_zeros) {
+				if (counter >= n_of_zeros) {
 					most_zeros = i;
 					n_of_zeros = counter;
 				}
@@ -107,6 +96,16 @@ public:
 			n_of_zeros = 0;
 			most_zeros = -1;
 		}
+	}
+
+public:
+	T findPivot(size_t row) {
+		T val;
+		for (register int j = 0; j < m_cols; j++) {
+			val = m_arr[row][j];
+			if (val != 0)return val;
+		}
+		return 0;
 	}
 
 	void check_and_clear_almost_zeros() {
@@ -335,7 +334,7 @@ public:
 		Matrix<T> tmp = returnEchelonForm();
 		int counter = 0;
 		for (register int i = 0; i < m_rows; ++i) {
-			if (findPivot(i) != 0)counter++;
+			if (tmp.findPivot(i) != 0)counter++;
 			else return counter;
 		}
 		return counter;
@@ -343,12 +342,14 @@ public:
 
 	Matrix<T> inverseMatrix() {
 		Matrix<T> res(m_rows, m_cols);
-		Matrix<T> temp(m_rows - 1, m_cols - 1);
 		T det = determinant();
-		for (int i = 0; i < m_rows; i++) {
-			for (int j = 0; j < m_cols; j++) {
-				temp = removeColAndRow(j, i);
-				res[i][j] = std::pow(-1, i + j)*temp.determinant() / det;
+		if (det != 0) {
+			Matrix<T> temp(m_rows - 1, m_cols - 1);
+			for (int i = 0; i < m_rows; i++) {
+				for (int j = 0; j < m_cols; j++) {
+					temp = removeColAndRow(j, i);
+					res[i][j] = std::pow(-1, i + j)*temp.determinant() / det;
+				}
 			}
 		}
 
@@ -361,19 +362,7 @@ public:
 		return inverse == transpose;
 	}
 	//not the most efficient....
-
-	/*@TODO problem with this matrix (
-		3,-1,-2,3,-1,
-		4, 1, 2, 5, 4,
-		7, 10, 10, 2, -3,
-		2, -3, -6, 1, -6,
-		3, 9, 8, -6, -7,
-		)
-		*/
-	
-	//http://www.math-exercises.com/matrices/rank-of-a-matrix
-
-
+	//complexity : O(n^4)
 	void reduceToEchelonForm() {
 		T pivot;
 		orderByLeadingZeros();
@@ -441,6 +430,12 @@ public:
 		else if (isSymmetrical())return MatrixType::Symmetrical;
 		else if (isAntisymmetrical())return MatrixType::AntiSymmetrical;
 		else return MatrixType::Nothing;
+	}
+
+	void pow(int n) {
+		while (--n > 0) {
+			(*this) *= (*this);
+		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////OPERATORSSSSSSS///////////////////////////////////////////////////////////////////

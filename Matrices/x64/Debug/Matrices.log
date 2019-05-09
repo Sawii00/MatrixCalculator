@@ -1,2 +1,8 @@
 ﻿  main.cpp
+c:\dev\c++\matrices\matrices\main.cpp(37): warning C4244: 'return': conversion from '_Rep' to 'double', possible loss of data
+          with
+          [
+              _Rep=__int64
+          ]
+c:\dev\c++\matrices\matrices\main.cpp(74): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
   Matrices.vcxproj -> C:\Dev\C++\Matrices\x64\Debug\Matrices.exe
