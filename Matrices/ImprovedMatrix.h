@@ -1,6 +1,4 @@
 #pragma once
-
-#pragma once
 #include <iostream>
 #include <cmath>
 
@@ -337,6 +335,7 @@ public:
 		return res.trace();
 	}
 	//it returns the DETERMINANT of the current matrix
+	//@TODO: check which cols/rows have more zeros and calculate it with respect to it
 	T determinant() {
 		REQUIRE(m_rows == m_cols, "Cannot calculate determinant of non-square matrix");
 		if (m_rows == 1 && m_cols == 1) return m_arr[0];
@@ -510,11 +509,11 @@ public:
 		res.subtract(rhs);
 		return res;
 	}
-	inline ImprovedMatrix<T>& operator+=(const ImprovedMatrix& rhs) {
+	inline ImprovedMatrix<T>& operator+=(ImprovedMatrix& rhs) {
 		add(rhs);
 		return *this;
 	}
-	inline ImprovedMatrix<T>& operator-=(const ImprovedMatrix& rhs) {
+	inline ImprovedMatrix<T>& operator-=(ImprovedMatrix& rhs) {
 		subtract(rhs);
 		return *this;
 	}

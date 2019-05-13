@@ -1,8 +1,13 @@
 ﻿  main.cpp
-c:\dev\c++\matrices\matrices\main.cpp(37): warning C4244: 'return': conversion from '_Rep' to 'double', possible loss of data
+c:\dev\c++\matrices\matrices\simdmatrix.h(364): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+c:\dev\c++\matrices\matrices\simdmatrix.h(387): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\dev\c++\matrices\matrices\simdmatrix.h(541): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\dev\c++\matrices\matrices\main.cpp(38): warning C4244: 'return': conversion from '_Rep' to 'double', possible loss of data
           with
           [
               _Rep=__int64
           ]
-c:\dev\c++\matrices\matrices\main.cpp(74): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\dev\c++\matrices\matrices\main.cpp(85): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\dev\c++\matrices\matrices\main.cpp(105): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\dev\c++\matrices\matrices\main.cpp(107): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
   Matrices.vcxproj -> C:\Dev\C++\Matrices\x64\Debug\Matrices.exe

@@ -118,6 +118,7 @@
     <ClInclude Include="ComplexNumber.h" />
     <ClInclude Include="ImprovedMatrix.h" />
     <ClInclude Include="Matrix.h" />
+    <ClInclude Include="SIMDMatrix.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
