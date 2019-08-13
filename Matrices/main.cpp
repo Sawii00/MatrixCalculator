@@ -81,7 +81,11 @@ void printMatrix(SIMDMatrix& mat) {
 	}
 	std::cout << std::endl << std::endl;
 }
+
+void applyKernel(SIMDMatrix &m, SIMDMatrix& ker);
+
 int main() {
+	/*
 	srand(time(NULL));
 	while (true) {
 		std::cout << "Insert m and n: ";
@@ -104,26 +108,22 @@ int main() {
 				//std::cin >> temp;
 				temp = rand() % 20;
 				array[i][j] = temp;
-				temp = rand() % 20;
+				//temp = rand() % 20;
 				arr[i][j] = temp;
 			}
 		}
 
 		SIMDMatrix mat(array, m, n);
-		SIMDMatrix mat2(arr, m, n);
 
-		ImprovedMatrix<float> mat1(array, m, n);
-		ImprovedMatrix<float> mat3(arr, m, n);
-		t.start();
-		mat += mat2;
-		t.stop();
+		printMatrix(mat);
+		std::cout << "\n\n\n";
+
 		t2.start();
-		mat1 += mat3;
+		double det2 = mat.det_2();
 		t2.stop();
-		//printMatrix(mat);
-		//printMatrix(mat1);
-		std::cout << "SIMD took: " << t.elapsedMilliseconds() << '\n';
-		std::cout << "NON-SIMD took: " << t2.elapsedMilliseconds() << '\n';
+
+		std::cout << " Det2: " << det2 << '\n';
+		std::cout << "time for Det2: " << t2.elapsedMilliseconds() << '\n';
 
 		//clearing up mess
 		for (int i = 0; i < m; i++)
@@ -132,8 +132,39 @@ int main() {
 		}
 		delete[] array;
 	}
+	*/
+	float k[] = { 2,3,-2,4,5,-4,-4,-4,2 };
+	SIMDMatrix kernel(k, 3, 3);
+
+	float m[] = { 5,4,25,35,20,60,45,40,30,10,11,60,80,15,5,80,22,20,10,1,200,140,50,0,8 };
+	SIMDMatrix mat(m, 5, 5);
+
+	printMatrix(mat);
+
+	applyKernel(mat, kernel);
+
+	printMatrix(mat);
 
 	system("pause");
 
 	return 0;
+}
+
+void applyKernel(SIMDMatrix &m, SIMDMatrix& ker) {
+	int size = ker.getCols();
+	int costant = int(size / 2);
+	float res = 0;
+	for (register int i = 0; i < m.getRows(); i++) {
+		for (register int j = 0; j < m.getCols(); j++) {
+			for (register int k = -costant; k <= costant; k++) {
+				for (register int l = -costant; l <= costant; l++) {
+					if (i + k < 0 || i + k >= m.getRows())continue;
+					if (j + l < 0 || j + l >= m.getCols())continue;
+					res += (m[i + k][j + l] * ker[costant + k][costant + l]);
+				}
+			}
+			m[i][j] = res;
+			res = 0;
+		}
+	}
 }

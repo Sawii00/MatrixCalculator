@@ -9,9 +9,9 @@ enum SIMDMatrixType
 	Nothinggg, Symmetricalll, AntiSymmetricalll, Diagonalll, UpperTriangularrr, LowerTriangularrr
 };
 
-/*void REQUIRE(bool condition, const char* string) {
+void REQUIRE(bool condition, const char* string) {
 	if (!condition)throw string;
-}*/
+}
 
 class SIMDMatrix
 {
@@ -138,7 +138,7 @@ public:
 	void check_and_clear_almost_zeros() {
 		for (int i = 0; i < m_rows*m_cols; i++)
 		{
-			if (false_zero(m_arr[i]))m_arr[i] = 0;
+			if (false_zero(m_arr[i]))m_arr[i] = abs(0);
 		}
 	}
 
@@ -227,13 +227,7 @@ public:
 	//adds a matrix to the current object
 	void add(const SIMDMatrix& mat) {
 		if (mat.getRows() != m_rows || mat.getCols() != m_cols)return;
-		/*for (int i = 0; i < m_rows; i++)
-		{
-			for (int j = 0; j < m_cols; j++)
-			{
-				m_arr[m_cols* i + j] += mat[i][j];
-			}
-		}*/
+
 		int remaining = (m_cols * m_rows) % 8;
 		int steps = (m_cols*m_rows) / 8;
 
@@ -247,15 +241,31 @@ public:
 			m_arr[i] += *(mat.getMatrixPointer() + i);
 		}
 	}
+	//@TODO optimize this
+	void add(const float f) {
+		for (register int i = 0; i < m_cols*m_rows; i++) {
+			m_arr[i] += f;
+		}
+	}
 	//subtracts a matrix from the current object
 	void subtract(const SIMDMatrix& mat) {
 		if (mat.getRows() != m_rows || mat.getCols() != m_cols)return;
-		for (int i = 0; i < m_rows; i++)
-		{
-			for (int j = 0; j < m_cols; j++)
-			{
-				m_arr[m_cols* i + j] -= mat[i][j];
-			}
+		int remaining = (m_cols * m_rows) % 8;
+		int steps = (m_cols*m_rows) / 8;
+
+		for (register int i = 0; i < steps; i++) {
+			__m256 first = _mm256_load_ps(m_arr + i * 8);
+			__m256 second = _mm256_load_ps(mat.getMatrixPointer() + i * 8);
+			first = _mm256_sub_ps(first, second);
+			memcpy(m_arr + i * 8, (float*)&first, sizeof(float) * 8);
+		}
+		for (register int i = m_cols * m_rows - remaining; i < m_cols*m_rows; i++) {
+			m_arr[i] += *(mat.getMatrixPointer() + i);
+		}
+	}
+	void subtract(const float f) {
+		for (register int i = 0; i < m_cols*m_rows; i++) {
+			m_arr[i] -= f;
 		}
 	}
 
@@ -343,21 +353,21 @@ public:
 		return result;
 	}
 	//returns the result of the scalar product between this and another matrix
-	float scalarProduct(SIMDMatrix& mat) {
+	float dotProduct(SIMDMatrix& mat) {
 		SIMDMatrix temp = mat.transposedMatrix();
 		SIMDMatrix res = rowByColProduct(temp);
 		return res.trace();
 	}
 	//it returns the DETERMINANT of the current matrix
 	//@TODO: check which cols/rows have more zeros and calculate it with respect to it
-	float determinant() {
+	double determinant() {
 		REQUIRE(m_rows == m_cols, "Cannot calculate determinant of non-square matrix");
 		if (m_rows == 1 && m_cols == 1) return m_arr[0];
 		if (m_rows == 2 && m_cols == 2) {
 			return m_arr[0] * m_arr[3] - m_arr[1] * m_arr[2];
 		}
 
-		float res = 0;
+		double res = 0;
 		SIMDMatrix temp(m_rows - 1, m_cols - 1);
 		for (int i = 0; i < m_cols; i++) {
 			temp = removeColAndRow(0, i);
@@ -365,6 +375,21 @@ public:
 		}
 		return res;
 	}
+
+	double det_2() {
+		REQUIRE(m_rows == m_cols, "Cannot calculate determinant of non-square matrix");
+		if (m_rows == 1 && m_cols == 1) return m_arr[0];
+		if (m_rows == 2 && m_cols == 2) {
+			return m_arr[0] * m_arr[3] - m_arr[1] * m_arr[2];
+		}
+		SIMDMatrix mat = this->returnEchelonForm();
+		double res = 1.0f;
+		for (register int i = 0; i < mat.getCols(); i++) {
+			res *= mat[i][i];
+		}
+		return res;
+	}
+
 	//it returns the RANK of the current matrix
 	int rank() {
 		SIMDMatrix tmp = returnEchelonForm();
@@ -388,7 +413,7 @@ public:
 				}
 			}
 		}
-
+		res.check_and_clear_almost_zeros();
 		return res;
 	}
 	//returns true if the current matrix is orthogonal (i.e if its inverse and its transposed are equal)
@@ -484,6 +509,35 @@ public:
 		}
 	}
 
+	float sum() {
+		REQUIRE(m_cols == 1, "Sum only available with 1 col");
+		float res = 0.0f;
+		for (register int i = 0; i < m_rows; i++) {
+			res += m_arr[i*m_cols];
+		}
+		return res;
+	}
+
+	//sees the matrix like column vectors and does the scalar product of them all
+	float scalar() const {
+		REQUIRE(m_cols == 2, "Scalar only available with two cols");
+		float res = 0.0f;
+		for (register int i = 0; i < m_rows; i++) {
+			res += m_arr[i*m_cols] * m_arr[i*m_cols + 1];
+		}
+		return res;
+	}
+
+	float scalar(const SIMDMatrix & rhs) const {
+		REQUIRE(m_cols == 1 && rhs.getCols() == 1 && m_rows == rhs.getRows(), "They need to be two vectors that have the same shape");
+		float res = 0.0f;
+
+		for (register int i = 0; i < m_rows; i++) {
+			res += m_arr[i*m_cols] * rhs[i*rhs.getCols()][0];
+		}
+		return res;
+	}
+
 	//////////////////////////////////////////////////////////////////////////OPERATORSSSSSSS///////////////////////////////////////////////////////////////////
 
 	inline MITM operator[](int index) const {
@@ -518,11 +572,22 @@ public:
 		res.add(rhs);
 		return res;
 	}
+	inline SIMDMatrix operator+(const float rhs) {
+		SIMDMatrix res(*this);
+		res.add(rhs);
+		return res;
+	}
 	inline SIMDMatrix operator-(const SIMDMatrix& rhs) {
 		SIMDMatrix res(*this);
 		res.subtract(rhs);
 		return res;
 	}
+	inline SIMDMatrix operator-(const float& rhs) {
+		SIMDMatrix res(*this);
+		res.subtract(rhs);
+		return res;
+	}
+
 	inline SIMDMatrix& operator+=(const SIMDMatrix& rhs) {
 		add(rhs);
 		return *this;
