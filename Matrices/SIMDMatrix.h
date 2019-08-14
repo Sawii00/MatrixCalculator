@@ -107,22 +107,6 @@ public:
 		}
 		std::cout << std::endl;
 	}
-	void GOD(SIMDMatrix & temp) {
-		add(temp);
-		print_array();
-		subtract(temp);
-		print_array();
-		multiplyByScalar(10.0);
-		print_array();
-		std::cout << trace();
-		SIMDMatrix trans = transposedMatrix();
-		trans.print_array();
-		std::cout << determinant() << '\n';
-		std::cout << rank() << '\n';
-		SIMDMatrix inv = inverseMatrix();
-		inv.print_array();
-		std::cout << categorizeMatrix();
-	}
 
 	//SEARCHES FOR PIVOT IN A SPECIFIED ROW
 	float findPivot(size_t row) {
@@ -143,7 +127,11 @@ public:
 	}
 
 	//////////////////////////////////////////////////////////////////////////CONSTRUCTORS AND DESTRUCTORS////////////////////////////////////////7///////////////////
-	SIMDMatrix() = delete;
+	SIMDMatrix() {
+		m_arr = nullptr;
+		m_cols = 0;
+		m_rows = 0;
+	}
 	SIMDMatrix(int m, int n)
 		:m_rows(m), m_cols(n)
 	{
@@ -172,6 +160,7 @@ public:
 	SIMDMatrix(const SIMDMatrix& mat)
 		:m_rows(mat.getRows()), m_cols(mat.getCols())
 	{
+		if (m_arr)_aligned_free(m_arr);
 		m_arr = static_cast<float*>(_aligned_malloc(sizeof(float)*m_rows*m_cols, sizeof(float)));
 
 		memcpy(m_arr, mat.getMatrixPointer(), sizeof(float)*(m_rows*m_cols));
@@ -220,7 +209,7 @@ public:
 
 	//gets the selected cell and puts the object in it
 	void setElement(size_t i, size_t j, float el) {
-		REQUIRE(i >= 0 || i < m_rows || j >= 0 || j < m_cols, "OutOfBoundAccess");
+		REQUIRE(i >= 0 && i < m_rows && j >= 0 && j < m_cols, "OutOfBoundAccess");
 		m_arr[m_cols*i + j] = el;
 	}
 	//////////////////////////////////////////////////////////////////////////OPERATION FUNCTIONS//////////////////////////////////////////////////////////////////////////
@@ -514,26 +503,6 @@ public:
 		float res = 0.0f;
 		for (register int i = 0; i < m_rows; i++) {
 			res += m_arr[i*m_cols];
-		}
-		return res;
-	}
-
-	//sees the matrix like column vectors and does the scalar product of them all
-	float scalar() const {
-		REQUIRE(m_cols == 2, "Scalar only available with two cols");
-		float res = 0.0f;
-		for (register int i = 0; i < m_rows; i++) {
-			res += m_arr[i*m_cols] * m_arr[i*m_cols + 1];
-		}
-		return res;
-	}
-
-	float scalar(const SIMDMatrix & rhs) const {
-		REQUIRE(m_cols == 1 && rhs.getCols() == 1 && m_rows == rhs.getRows(), "They need to be two vectors that have the same shape");
-		float res = 0.0f;
-
-		for (register int i = 0; i < m_rows; i++) {
-			res += m_arr[i*m_cols] * rhs[i*rhs.getCols()][0];
 		}
 		return res;
 	}

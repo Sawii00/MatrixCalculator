@@ -116,6 +116,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ComplexNumber.h" />
+    <ClInclude Include="Vector.h" />
     <ClInclude Include="ImprovedMatrix.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="SIMDMatrix.h" />
